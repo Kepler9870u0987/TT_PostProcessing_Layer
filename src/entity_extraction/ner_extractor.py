@@ -25,7 +25,7 @@ def _get_nlp_model():
             import spacy
             _nlp_model = spacy.load("it_core_news_lg")
             logger.info("Loaded spaCy model: it_core_news_lg")
-        except OSError:
+        except (OSError, ImportError):
             logger.warning(
                 "spaCy model 'it_core_news_lg' not found. "
                 "Install with: python -m spacy download it_core_news_lg"
