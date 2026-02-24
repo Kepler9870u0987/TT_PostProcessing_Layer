@@ -22,7 +22,7 @@ def _get_nlp_model():
     global _nlp_model
     if _nlp_model is None:
         try:
-            import spacy
+            import spacy  # type: ignore[import-untyped]
             _nlp_model = spacy.load("it_core_news_lg")
             logger.info("Loaded spaCy model: it_core_news_lg")
         except (OSError, ImportError):

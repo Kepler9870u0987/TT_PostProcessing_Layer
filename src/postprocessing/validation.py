@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_llm_output_multistage(
-    output_json: str,
+    output_json: str | dict,
     candidates: List[dict],
     text_canonical: str,
     allowed_topics: List[str] | None = None,

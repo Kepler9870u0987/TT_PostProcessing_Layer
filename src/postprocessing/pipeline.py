@@ -107,7 +107,8 @@ def postprocess_and_enrich(
             f"LLM output validation failed: {validation_result.errors}"
         )
 
-    triage_normalized = validation_result.data
+    assert validation_result.data is not None
+    triage_normalized: dict = validation_result.data
 
     # Check evidence policy
     if not enforce_evidence_policy(
