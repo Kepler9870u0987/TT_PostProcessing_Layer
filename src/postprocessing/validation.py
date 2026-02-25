@@ -18,11 +18,62 @@ from typing import List
 import numpy as np
 from jsonschema import ValidationError, validate
 
-from src.config.constants import MIN_CONFIDENCE_WARNING, TOPICS_ENUM
+from src.config.constants import LABELID_ALIASES, MIN_CONFIDENCE_WARNING, TOPICS_ENUM
 from src.config.schemas import LLM_RESPONSE_SCHEMA
 from src.models.validation import ValidationResult
 
 logger = logging.getLogger(__name__)
+
+
+# ======================================================================
+# Internal helpers
+# ======================================================================
+
+def _normalize_labelid_aliases(data: dict, warnings: List[str]) -> dict:
+    """
+    Remap LLM-generated labelid variants to canonical TOPICS_ENUM values,
+    and strip extra fields from keywordsintext items (schema v3.3 allows
+    only `candidateid`).
+
+    Operates on shallow copies so the original dict is not mutated.
+    Appends a warning for every alias/strip that is resolved.
+    """
+    normalized_topics = []
+    for topic in data.get("topics", []):
+        topic = dict(topic)
+
+        # --- Alias normalization ---
+        labelid = topic.get("labelid", "")
+        canonical = LABELID_ALIASES.get(labelid)
+        if canonical and canonical != labelid:
+            warnings.append(
+                f"labelid alias resolved: '{labelid}' → '{canonical}'"
+            )
+            topic["labelid"] = canonical
+
+        # --- Strip extra fields from keywordsintext (schema: only candidateid) ---
+        # The LLM naturally mirrors candidate fields (lemma, count, term, source,
+        # embeddingscore) from the prompt — this is expected behaviour, not an error.
+        # resolve_keywords_from_catalog() will repopulate all fields from the trusted
+        # catalog, so we silently discard anything beyond candidateid here.
+        # Only warn for truly unexpected fields beyond the known LLM echo set.
+        KNOWN_LLM_ECHO_FIELDS = {"candidateid", "lemma", "count", "term", "source", "embeddingscore"}
+        clean_kws = []
+        for kw in topic.get("keywordsintext", []):
+            truly_unexpected = set(kw.keys()) - KNOWN_LLM_ECHO_FIELDS
+            if truly_unexpected:
+                warnings.append(
+                    f"keywordsintext: stripped unexpected fields {sorted(truly_unexpected)} "
+                    f"from candidate '{kw.get('candidateid', '?')}'"
+                )
+            clean_kws.append({"candidateid": kw["candidateid"]})
+        topic["keywordsintext"] = clean_kws
+
+        normalized_topics.append(topic)
+
+    if "topics" in data:
+        data = {**data, "topics": normalized_topics}
+    return data
 
 
 def validate_llm_output_multistage(
@@ -68,6 +119,11 @@ def validate_llm_output_multistage(
         except json.JSONDecodeError as e:
             errors.append(f"Invalid JSON: {e}")
             return ValidationResult(valid=False, errors=errors, warnings=warnings)
+
+    # ------------------------------------------------------------------
+    # Stage 1b: Alias normalization (before schema — cosmetic LLM variants)
+    # ------------------------------------------------------------------
+    data = _normalize_labelid_aliases(data, warnings)
 
     # ------------------------------------------------------------------
     # Stage 2: Schema validation
@@ -165,6 +221,90 @@ def verify_evidence_quotes(topics: List[dict], text_canonical: str) -> List[str]
                         )
 
     return warnings
+
+
+def compute_span_from_quote(
+    quote: str,
+    body_canonical: str,
+) -> tuple[list[int] | None, str]:
+    """
+    Calculate the byte-offset span ``[start, end]`` for *quote* inside
+    *body_canonical*.
+
+    Strategy:
+        1. Exact substring match — status ``"exact_match"``.
+        2. Fuzzy sliding-window match via :func:`difflib.SequenceMatcher`
+           with a minimum ratio of 0.85 — status ``"fuzzy_match"``.
+        3. Not found — returns ``(None, "not_found")``.
+
+    Returns:
+        A ``(span, status)`` tuple where *span* is ``[start, end]`` or
+        ``None`` when not found.
+    """
+    if not quote or not body_canonical:
+        return None, "not_found"
+
+    # --- Exact match ---
+    start = body_canonical.find(quote)
+    if start != -1:
+        return [start, start + len(quote)], "exact_match"
+
+    # --- Fuzzy match ---
+    from difflib import SequenceMatcher
+
+    best_ratio = 0.0
+    best_span: list[int] | None = None
+    q_len = len(quote)
+    window_size = q_len + 20
+
+    for i in range(max(0, len(body_canonical) - q_len + 1)):
+        window = body_canonical[i : i + window_size]
+        ratio = SequenceMatcher(None, quote, window, autojunk=False).ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_span = [i, i + q_len]
+
+    if best_ratio >= 0.85 and best_span is not None:
+        return best_span, "fuzzy_match"
+
+    return None, "not_found"
+
+
+def enrich_evidence_with_spans(
+    topics: List[dict],
+    body_canonical: str,
+) -> List[dict]:
+    """
+    Enrich every evidence item in *topics* with a server-computed span.
+
+    For each evidence entry:
+
+    * ``span``        — server-computed ``[start, end]`` (``None`` if not found)
+    * ``span_llm``    — original span produced by the LLM (kept for audit)
+    * ``span_status`` — one of ``"exact_match"``, ``"fuzzy_match"``, ``"not_found"``
+
+    The LLM-supplied span (if present) is moved to ``span_llm`` and
+    replaced with the server-computed value.
+
+    Returns:
+        The (mutated) topics list with enriched evidence dicts.
+    """
+    for topic in topics:
+        for ev in topic.get("evidence", []):
+            quote = ev.get("quote", "")
+            computed_span, status = compute_span_from_quote(quote, body_canonical)
+
+            ev["span_llm"] = ev.get("span")  # preserve original LLM span for audit
+            ev["span"] = computed_span
+            ev["span_status"] = status
+
+            if status == "not_found":
+                logger.warning(
+                    "Server-side span: quote not found in text: '%s...'",
+                    quote[:50],
+                )
+
+    return topics
 
 
 def enforce_evidence_policy(topics: List[dict], text_canonical: str, threshold: float = 0.3) -> bool:

@@ -87,6 +87,19 @@ EXISTING_CUSTOMER_SIGNALS: List[str] = [
 CANONICALIZATION_VERSION: str = "1.2.0"
 
 # =============================================================================
+# LabelID aliases — map LLM-generated variants to canonical TOPICS_ENUM values
+# Models may omit underscores or use different casing: normalised before schema
+# validation so no retry is triggered for cosmetic deviations.
+# =============================================================================
+LABELID_ALIASES: dict = {
+    "INFOCOMMERCIALI":       "INFO_COMMERCIALI",
+    "INFO_COMMERCIALI":      "INFO_COMMERCIALI",  # canonical — kept for completeness
+    "ASSISTENZATECNICA":     "ASSISTENZA_TECNICA",
+    "ASSISTENZA TECNICA":    "ASSISTENZA_TECNICA",
+    "UNKNOWN":               "UNKNOWN_TOPIC",
+}
+
+# =============================================================================
 # Evidence & quality thresholds
 # =============================================================================
 MIN_CONFIDENCE_WARNING: float = 0.2

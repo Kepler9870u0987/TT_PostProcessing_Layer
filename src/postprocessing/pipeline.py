@@ -31,6 +31,7 @@ from src.postprocessing.output_builder import build_triage_output_schema
 from src.postprocessing.priority_scorer import PriorityScorer, priority_scorer
 from src.postprocessing.validation import (
     enforce_evidence_policy,
+    enrich_evidence_with_spans,
     validate_llm_output_multistage,
 )
 
@@ -118,6 +119,16 @@ def postprocess_and_enrich(
     ):
         logger.warning("Evidence policy failed — would trigger retry in production")
         # In production: retry LLM call here
+
+    # ==================================================================
+    # Stage 1b: Server-side Span Computation ★FIX Span Mismatch★
+    # Replace LLM-generated spans with deterministically computed offsets.
+    # Original LLM span is preserved as span_llm for audit purposes.
+    # ==================================================================
+    triage_normalized["topics"] = enrich_evidence_with_spans(
+        triage_normalized.get("topics", []),
+        document.body_canonical,
+    )
 
     # ==================================================================
     # Stage 2: Keyword Resolution from Catalog ★FIX #1★

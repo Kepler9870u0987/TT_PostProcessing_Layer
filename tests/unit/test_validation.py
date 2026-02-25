@@ -8,8 +8,10 @@ import json
 import pytest
 
 from src.postprocessing.validation import (
+    compute_span_from_quote,
     deduplicate_and_normalize,
     enforce_evidence_policy,
+    enrich_evidence_with_spans,
     validate_llm_output_multistage,
     verify_evidence_quotes,
 )
@@ -228,3 +230,156 @@ class TestEvidencePolicy:
 
     def test_empty_evidence_passes(self):
         assert enforce_evidence_policy([], "any text", threshold=0.3) is True
+
+
+# ===========================================================================
+# Fix 1 regression — LLM echo fields must NOT generate warnings
+# ===========================================================================
+
+class TestSchemaStripNoWarnings:
+    """LLM naturally echoes count/lemma/term/source/embeddingscore.
+    After Fix 1, only truly unexpected fields should produce warnings."""
+
+    def _make_output(self, kw_fields: dict) -> dict:
+        return {
+            "dictionaryversion": 42,
+            "sentiment": {"value": "neutral", "confidence": 0.5},
+            "priority": {"value": "low", "confidence": 0.5, "signals": []},
+            "topics": [
+                {
+                    "labelid": "CONTRATTO",
+                    "confidence": 0.8,
+                    "keywordsintext": [{**kw_fields, "candidateid": "ABC123"}],
+                    "evidence": [{"quote": "test"}],
+                },
+            ],
+        }
+
+    def test_count_lemma_no_strip_warning(self, mock_candidates, mock_document):
+        """count + lemma from LLM must NOT produce a 'stripped unexpected fields' warning."""
+        output = self._make_output({"lemma": "contratto", "count": 2})
+        result = validate_llm_output_multistage(
+            output, mock_candidates, mock_document.body_canonical
+        )
+        strip_warnings = [w for w in result.warnings if "stripped unexpected fields" in w]
+        assert strip_warnings == [], f"Unexpected strip warnings: {strip_warnings}"
+
+    def test_all_known_echo_fields_no_strip_warning(self, mock_candidates, mock_document):
+        """All known LLM echo fields must be silently accepted."""
+        output = self._make_output({
+            "lemma": "contratto",
+            "count": 2,
+            "term": "contratto",
+            "source": "body",
+            "embeddingscore": 0.75,
+        })
+        result = validate_llm_output_multistage(
+            output, mock_candidates, mock_document.body_canonical
+        )
+        strip_warnings = [w for w in result.warnings if "stripped unexpected fields" in w]
+        assert strip_warnings == []
+
+    def test_truly_unknown_field_still_warns(self, mock_candidates, mock_document):
+        """A genuinely unknown field must still produce a warning."""
+        output = self._make_output({"totally_unknown_field": "value"})
+        result = validate_llm_output_multistage(
+            output, mock_candidates, mock_document.body_canonical
+        )
+        strip_warnings = [w for w in result.warnings if "stripped unexpected fields" in w]
+        assert len(strip_warnings) == 1
+        assert "totally_unknown_field" in strip_warnings[0]
+
+
+# ===========================================================================
+# Fix 2 — server-side span computation
+# ===========================================================================
+
+class TestComputeSpanFromQuote:
+    """Unit tests for compute_span_from_quote()."""
+
+    def test_exact_match(self):
+        body = "Buongiorno, vorrei confermare i dati del contratto."
+        quote = "confermare i dati del contratto"
+        span, status = compute_span_from_quote(quote, body)
+        assert status == "exact_match"
+        assert span is not None
+        assert body[span[0]:span[1]] == quote
+
+    def test_exact_match_at_start(self):
+        body = "Codice Fiscale: RSSMRA80A01H501U e altro testo"
+        quote = "Codice Fiscale: RSSMRA80A01H501U"
+        span, status = compute_span_from_quote(quote, body)
+        assert status == "exact_match"
+        assert span == [0, len(quote)]
+
+    def test_fuzzy_match_double_space(self):
+        body = "verifica  il  documento allegato"
+        quote = "verifica il documento allegato"
+        span, status = compute_span_from_quote(quote, body)
+        assert status in ("exact_match", "fuzzy_match")
+        assert span is not None
+
+    def test_not_found(self):
+        body = "Testo completamente diverso senza corrispondenza."
+        quote = "questa frase non esiste nel testo"
+        span, status = compute_span_from_quote(quote, body)
+        assert status == "not_found"
+        assert span is None
+
+    def test_empty_quote_returns_not_found(self):
+        span, status = compute_span_from_quote("", "qualsiasi testo")
+        assert status == "not_found"
+        assert span is None
+
+    def test_empty_body_returns_not_found(self):
+        span, status = compute_span_from_quote("una quote", "")
+        assert status == "not_found"
+        assert span is None
+
+
+class TestEnrichEvidenceWithSpans:
+    """Unit tests for enrich_evidence_with_spans()."""
+
+    def test_exact_match_sets_span_and_status(self):
+        body = "Vorrei confermare i dati del contratto."
+        topics = [{"evidence": [{"quote": "confermare i dati del contratto"}]}]
+        result = enrich_evidence_with_spans(topics, body)
+        ev = result[0]["evidence"][0]
+        assert ev["span_status"] == "exact_match"
+        assert ev["span"] is not None
+        assert body[ev["span"][0]:ev["span"][1]] == "confermare i dati del contratto"
+
+    def test_llm_span_preserved_as_span_llm(self):
+        body = "Vorrei confermare i dati del contratto."
+        original_llm_span = [0, 5]
+        topics = [{"evidence": [{"quote": "confermare i dati del contratto", "span": original_llm_span}]}]
+        result = enrich_evidence_with_spans(topics, body)
+        ev = result[0]["evidence"][0]
+        assert ev["span_llm"] == original_llm_span
+
+    def test_missing_llm_span_stored_as_none(self):
+        body = "Testo di prova."
+        topics = [{"evidence": [{"quote": "Testo di prova"}]}]
+        result = enrich_evidence_with_spans(topics, body)
+        ev = result[0]["evidence"][0]
+        assert ev["span_llm"] is None
+
+    def test_not_found_sets_span_none(self):
+        body = "Testo completamente diverso."
+        topics = [{"evidence": [{"quote": "frase inesistente al mondo"}]}]
+        result = enrich_evidence_with_spans(topics, body)
+        ev = result[0]["evidence"][0]
+        assert ev["span_status"] == "not_found"
+        assert ev["span"] is None
+
+    def test_multiple_topics_all_enriched(self):
+        body = "contratto firmato e fattura pagata."
+        topics = [
+            {"evidence": [{"quote": "contratto firmato"}]},
+            {"evidence": [{"quote": "fattura pagata"}]},
+        ]
+        result = enrich_evidence_with_spans(topics, body)
+        for t in result:
+            for ev in t["evidence"]:
+                assert "span_status" in ev
+                assert "span_llm" in ev

@@ -1,0 +1,343 @@
+{
+  "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+  "pipeline_version": {
+    "dictionaryversion": 42,
+    "modelversion": "gemma3:4b-it-q8_0",
+    "model_type": "chat",
+    "parserversion": "email-parser-1.3.0",
+    "stoplistversion": "stopwords-it-2025.2",
+    "nermodelversion": "it_core_news_lg-3.8.2",
+    "schemaversion": "json-schema-v3.3",
+    "toolcallingversion": "openai-tool-calling-2026"
+  },
+  "triage": {
+    "topics": [
+      {
+        "labelid": "CONTRATTO",
+        "confidence": 0.75592,
+        "keywordsintext": [
+          {
+            "candidateid": "L4CD0keGl10i4l43",
+            "lemma": "contrattare",
+            "term": "contratto",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.449
+          },
+          {
+            "candidateid": "t9lOmUSIi6dXny_-",
+            "lemma": "richiedere informazione contratto",
+            "term": "richiesta informazioni contratto",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.4981
+          },
+          {
+            "candidateid": "msyzHoS_Evg6f97C",
+            "lemma": "contratto abc",
+            "term": "contratto abc",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.449
+          }
+        ],
+        "evidence": [
+          {
+            "quote": "Volevo confermare che i dati sono corretti: Codice Fiscale: RSSMRA80A01H501U",
+            "span": [
+              42,
+              64
+            ]
+          },
+          {
+            "quote": "come discusso. Ho verificato tutti i dettagli e sono d'accordo con i termini proposti: durata 24 mesi",
+            "span": [
+              86,
+              126
+            ]
+          }
+        ],
+        "confidence_llm": 0.95,
+        "confidence_adjusted": 0.75592,
+        "keywords": [
+          {
+            "candidateid": "L4CD0keGl10i4l43",
+            "term": "contratto",
+            "lemma": "contrattare",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.449
+          },
+          {
+            "candidateid": "t9lOmUSIi6dXny_-",
+            "term": "richiesta informazioni contratto",
+            "lemma": "richiedere informazione contratto",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.4981
+          },
+          {
+            "candidateid": "msyzHoS_Evg6f97C",
+            "term": "contratto abc",
+            "lemma": "contratto abc",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.449
+          }
+        ]
+      },
+      {
+        "labelid": "INFO_COMMERCIALI",
+        "confidence": 0.6950599999999999,
+        "keywordsintext": [
+          {
+            "candidateid": "R-DXoOrrXpiqaMc6",
+            "lemma": "informazione",
+            "term": "informazioni",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.4235
+          },
+          {
+            "candidateid": "Os2IJycAYHGeHnrN",
+            "lemma": "informazione contratto",
+            "term": "informazioni contratto",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.3985
+          }
+        ],
+        "evidence": [
+          {
+            "quote": "Potete inviarmi il contratto definitivo in formato PDF editabile per apporre la firma digitale?",
+            "span": [
+              153,
+              193
+            ]
+          },
+          {
+            "quote": "Potete fornirmi un preventivo aggiornato con le nuove tariffe 2024?",
+            "span": [
+              223,
+              246
+            ]
+          }
+        ],
+        "confidence_llm": 0.8,
+        "confidence_adjusted": 0.6950599999999999,
+        "keywords": [
+          {
+            "candidateid": "R-DXoOrrXpiqaMc6",
+            "term": "informazioni",
+            "lemma": "informazione",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.4235
+          },
+          {
+            "candidateid": "Os2IJycAYHGeHnrN",
+            "term": "informazioni contratto",
+            "lemma": "informazione contratto",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.3985
+          }
+        ]
+      },
+      {
+        "labelid": "DOCUMENTI",
+        "confidence": 0.5476599999999999,
+        "keywordsintext": [
+          {
+            "candidateid": "3nagICgXcL2XHUkS",
+            "lemma": "documento",
+            "term": "documento",
+            "count": 1,
+            "source": "body",
+            "embeddingscore": 0.4202
+          },
+          {
+            "candidateid": "CL-6JNMnyweVxxT-",
+            "lemma": "richiesta",
+            "term": "richiesta",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.4178
+          }
+        ],
+        "evidence": [
+          {
+            "quote": "In allegato trovate il documento firmato e i dati aggiuntivi richiesti (IBAN per domiciliazione, delega amministrativa).",
+            "span": [
+              252,
+              283
+            ]
+          }
+        ],
+        "confidence_llm": 0.7,
+        "confidence_adjusted": 0.5476599999999999,
+        "keywords": [
+          {
+            "candidateid": "3nagICgXcL2XHUkS",
+            "term": "documento",
+            "lemma": "documento",
+            "count": 1,
+            "source": "body",
+            "embeddingscore": 0.4202
+          },
+          {
+            "candidateid": "CL-6JNMnyweVxxT-",
+            "term": "richiesta",
+            "lemma": "richiesta",
+            "count": 1,
+            "source": "subject",
+            "embeddingscore": 0.4178
+          }
+        ]
+      }
+    ],
+    "sentiment": {
+      "value": "neutral",
+      "confidence": 0.7
+    },
+    "priority": {
+      "value": "low",
+      "confidence": 0.7,
+      "signals": [],
+      "rawscore": 0.0
+    },
+    "customerstatus": {
+      "value": "existing",
+      "confidence": 1.0,
+      "source": "crm_exact_match"
+    }
+  },
+  "entities": [
+    {
+      "text": "RSSMRA80A01H501U",
+      "label": "CODICEFISCALE",
+      "start": 73,
+      "end": 89,
+      "source": "regex",
+      "confidence": 0.95
+    }
+  ],
+  "observations": [
+    {
+      "obs_id": "0765f059-4f13-45e1-a8cf-68e9483ee226",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "CONTRATTO",
+      "candidateid": "L4CD0keGl10i4l43",
+      "lemma": "contrattare",
+      "term": "contratto",
+      "count": 1,
+      "embeddingscore": 0.449,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331665+00:00"
+    },
+    {
+      "obs_id": "ba0c6c66-d20d-4b1e-8791-50ac4e9709fc",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "CONTRATTO",
+      "candidateid": "t9lOmUSIi6dXny_-",
+      "lemma": "richiedere informazione contratto",
+      "term": "richiesta informazioni contratto",
+      "count": 1,
+      "embeddingscore": 0.4981,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331691+00:00"
+    },
+    {
+      "obs_id": "6079e70d-df49-4c9e-9e18-fb83d17b665a",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "CONTRATTO",
+      "candidateid": "msyzHoS_Evg6f97C",
+      "lemma": "contratto abc",
+      "term": "contratto abc",
+      "count": 1,
+      "embeddingscore": 0.449,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331698+00:00"
+    },
+    {
+      "obs_id": "f7502d07-ee17-47d2-9dc3-cfa92284abbe",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "INFO_COMMERCIALI",
+      "candidateid": "R-DXoOrrXpiqaMc6",
+      "lemma": "informazione",
+      "term": "informazioni",
+      "count": 1,
+      "embeddingscore": 0.4235,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331703+00:00"
+    },
+    {
+      "obs_id": "6f6aa365-0511-4e9f-a903-8a86f42b8e0f",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "INFO_COMMERCIALI",
+      "candidateid": "Os2IJycAYHGeHnrN",
+      "lemma": "informazione contratto",
+      "term": "informazioni contratto",
+      "count": 1,
+      "embeddingscore": 0.3985,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331707+00:00"
+    },
+    {
+      "obs_id": "3c2ed88f-7a13-452d-b4e5-c1fb04a2f63d",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "DOCUMENTI",
+      "candidateid": "3nagICgXcL2XHUkS",
+      "lemma": "documento",
+      "term": "documento",
+      "count": 1,
+      "embeddingscore": 0.4202,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331711+00:00"
+    },
+    {
+      "obs_id": "03298488-38ec-4b02-bb20-147053e4f5de",
+      "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
+      "labelid": "DOCUMENTI",
+      "candidateid": "CL-6JNMnyweVxxT-",
+      "lemma": "richiesta",
+      "term": "richiesta",
+      "count": 1,
+      "embeddingscore": 0.4178,
+      "dict_version": 42,
+      "promoted_to_active": false,
+      "observed_at": "2026-02-24T23:02:49.331715+00:00"
+    }
+  ],
+  "diagnostics": {
+    "warnings": [
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'L4CD0keGl10i4l43'",
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 't9lOmUSIi6dXny_-'",
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'msyzHoS_Evg6f97C'",
+      "labelid alias resolved: 'INFOCOMMERCIALI' → 'INFO_COMMERCIALI'",
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'R-DXoOrrXpiqaMc6'",
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'Os2IJycAYHGeHnrN'",
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate '3nagICgXcL2XHUkS'",
+      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'CL-6JNMnyweVxxT-'",
+      "Span mismatch: span=[42,64] extracts 'sono corretti: Codice ...' but quote is 'Volevo confermare che i dati s...'",
+      "Span mismatch: span=[86,126] extracts '01U come discusso. Ho verifica...' but quote is 'come discusso. Ho verificato t...'",
+      "Span mismatch: span=[153,193] extracts 'con i termini proposti: durata...' but quote is 'Potete inviarmi il contratto d...'",
+      "Span mismatch: span=[223,246] extracts 'finitivo in formato PDF...' but quote is 'Potete fornirmi un preventivo ...'",
+      "Span mismatch: span=[252,283] extracts 'bile per apporre la firma digi...' but quote is 'In allegato trovate il documen...'"
+    ],
+    "validation_retries": 0,
+    "fallback_applied": false
+  },
+  "processing_metadata": {
+    "postprocessing_duration_ms": 9,
+    "entities_extracted": 1,
+    "observations_created": 7,
+    "confidence_adjustments_applied": 3
+  }
+}
