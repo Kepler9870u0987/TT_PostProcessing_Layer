@@ -158,8 +158,11 @@ class TestPipelineE2E:
 
         diag = result["diagnostics"]
         assert "warnings" in diag
+        assert "errors" in diag
         assert "validation_retries" in diag
         assert "fallback_applied" in diag
+        assert isinstance(diag["warnings"], list)
+        assert isinstance(diag["errors"], list)
 
     def test_processing_metadata(self, full_pipeline_inputs):
         doc, candidates, llm_output, version = full_pipeline_inputs
@@ -169,6 +172,31 @@ class TestPipelineE2E:
         meta = result["processing_metadata"]
         assert "postprocessing_duration_ms" in meta
         assert meta["postprocessing_duration_ms"] >= 0
+        assert "span_exact_match_count" in meta
+        assert "span_fuzzy_match_count" in meta
+        assert "span_not_found_count" in meta
+        total = meta["span_exact_match_count"] + meta["span_fuzzy_match_count"] + meta["span_not_found_count"]
+        # fixture has 2 evidence items across 2 topics
+        assert total == 2
+
+    def test_no_stale_span_mismatch_warnings_after_enrichment(self, full_pipeline_inputs):
+        """LLM span mismatches must not appear in diagnostics after server-side correction."""
+        doc, candidates, llm_output, version = full_pipeline_inputs
+
+        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+
+        # None of the final warnings should be a stale "Span mismatch: span=[...]" entry
+        for w in result["diagnostics"]["warnings"]:
+            assert not w.startswith("Span mismatch: span=["), (
+                f"Stale LLM span warning leaked into diagnostics: {w}"
+            )
+
+        # Evidence items that were corrected: span_status must be exact_match or fuzzy_match
+        for topic in result["triage"]["topics"]:
+            for ev in topic.get("evidence", []):
+                assert ev["span_status"] in ("exact_match", "fuzzy_match", "not_found")
+                assert "text_hash" in ev
+                assert ev["text_hash"] is not None
 
 
 class TestDeterminism:

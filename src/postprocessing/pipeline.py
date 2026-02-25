@@ -130,6 +130,33 @@ def postprocess_and_enrich(
         document.body_canonical,
     )
 
+    # Compute per-status span counts from enriched evidence.
+    span_counts: dict = {"exact_match": 0, "fuzzy_match": 0, "not_found": 0}
+    for _topic in triage_normalized["topics"]:
+        for _ev in _topic.get("evidence", []):
+            _status = _ev.get("span_status", "not_found")
+            if _status in span_counts:
+                span_counts[_status] += 1
+
+    # Replace stale LLM-span-mismatch warnings (produced *before* enrichment
+    # rewrote all spans) with a single informational summary message, so that
+    # diagnostics.warnings accurately reflects the *final* state of the data.
+    _corrected = sum(
+        1
+        for _t in triage_normalized["topics"]
+        for _e in _t.get("evidence", [])
+        if _e.get("span_status") in ("exact_match", "fuzzy_match")
+        and _e.get("span_llm") is not None
+    )
+    validation_result.warnings = [
+        w for w in validation_result.warnings
+        if not w.startswith("Span mismatch: span=[")
+    ]
+    if _corrected:
+        validation_result.warnings.append(
+            f"LLM span corrected server-side: {_corrected} span(s) recomputed from quote"
+        )
+
     # ==================================================================
     # Stage 2: Keyword Resolution from Catalog ★FIX #1★
     # ==================================================================
@@ -203,6 +230,7 @@ def postprocess_and_enrich(
         "observations": observations,
         "diagnostics": {
             "warnings": validation_result.warnings,
+            "errors": validation_result.errors,
             "validation_retries": validation_retries,
             "fallback_applied": fallback_applied,
         },
@@ -211,5 +239,8 @@ def postprocess_and_enrich(
             "entities_extracted": len(entities),
             "observations_created": len(observations),
             "confidence_adjustments_applied": len(triage_with_conf.get("topics", [])),
+            "span_exact_match_count": span_counts["exact_match"],
+            "span_fuzzy_match_count": span_counts["fuzzy_match"],
+            "span_not_found_count": span_counts["not_found"],
         },
     }

@@ -45,16 +45,28 @@
           {
             "quote": "Volevo confermare che i dati sono corretti: Codice Fiscale: RSSMRA80A01H501U",
             "span": [
+              13,
+              89
+            ],
+            "span_llm": [
               42,
               64
-            ]
+            ],
+            "span_status": "exact_match",
+            "text_hash": "b65ab80ee3f135041394d6aa56f7b6bca8cafaabb21d1410caaf6466470b4d43"
           },
           {
             "quote": "come discusso. Ho verificato tutti i dettagli e sono d'accordo con i termini proposti: durata 24 mesi",
             "span": [
+              90,
+              191
+            ],
+            "span_llm": [
               86,
               126
-            ]
+            ],
+            "span_status": "exact_match",
+            "text_hash": "b65ab80ee3f135041394d6aa56f7b6bca8cafaabb21d1410caaf6466470b4d43"
           }
         ],
         "confidence_llm": 0.95,
@@ -111,16 +123,28 @@
           {
             "quote": "Potete inviarmi il contratto definitivo in formato PDF editabile per apporre la firma digitale?",
             "span": [
+              192,
+              287
+            ],
+            "span_llm": [
               153,
               193
-            ]
+            ],
+            "span_status": "exact_match",
+            "text_hash": "b65ab80ee3f135041394d6aa56f7b6bca8cafaabb21d1410caaf6466470b4d43"
           },
           {
             "quote": "Potete fornirmi un preventivo aggiornato con le nuove tariffe 2024?",
             "span": [
+              288,
+              355
+            ],
+            "span_llm": [
               223,
               246
-            ]
+            ],
+            "span_status": "exact_match",
+            "text_hash": "b65ab80ee3f135041394d6aa56f7b6bca8cafaabb21d1410caaf6466470b4d43"
           }
         ],
         "confidence_llm": 0.8,
@@ -169,9 +193,15 @@
           {
             "quote": "In allegato trovate il documento firmato e i dati aggiuntivi richiesti (IBAN per domiciliazione, delega amministrativa).",
             "span": [
+              356,
+              476
+            ],
+            "span_llm": [
               252,
               283
-            ]
+            ],
+            "span_status": "exact_match",
+            "text_hash": "b65ab80ee3f135041394d6aa56f7b6bca8cafaabb21d1410caaf6466470b4d43"
           }
         ],
         "confidence_llm": 0.7,
@@ -224,7 +254,7 @@
   ],
   "observations": [
     {
-      "obs_id": "0765f059-4f13-45e1-a8cf-68e9483ee226",
+      "obs_id": "09e65b2c-41bd-42e9-8d60-df1ac821e993",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "CONTRATTO",
       "candidateid": "L4CD0keGl10i4l43",
@@ -234,10 +264,10 @@
       "embeddingscore": 0.449,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331665+00:00"
+      "observed_at": "2026-02-25T14:29:34.351696+00:00"
     },
     {
-      "obs_id": "ba0c6c66-d20d-4b1e-8791-50ac4e9709fc",
+      "obs_id": "f28f5d59-be80-4102-a3ab-4369511b9d69",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "CONTRATTO",
       "candidateid": "t9lOmUSIi6dXny_-",
@@ -247,10 +277,10 @@
       "embeddingscore": 0.4981,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331691+00:00"
+      "observed_at": "2026-02-25T14:29:34.351725+00:00"
     },
     {
-      "obs_id": "6079e70d-df49-4c9e-9e18-fb83d17b665a",
+      "obs_id": "1926398b-529c-4901-96c7-a496e96acd27",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "CONTRATTO",
       "candidateid": "msyzHoS_Evg6f97C",
@@ -260,10 +290,10 @@
       "embeddingscore": 0.449,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331698+00:00"
+      "observed_at": "2026-02-25T14:29:34.351733+00:00"
     },
     {
-      "obs_id": "f7502d07-ee17-47d2-9dc3-cfa92284abbe",
+      "obs_id": "0e2d872b-243e-4953-8286-69c4432abdec",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "INFO_COMMERCIALI",
       "candidateid": "R-DXoOrrXpiqaMc6",
@@ -273,10 +303,10 @@
       "embeddingscore": 0.4235,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331703+00:00"
+      "observed_at": "2026-02-25T14:29:34.351740+00:00"
     },
     {
-      "obs_id": "6f6aa365-0511-4e9f-a903-8a86f42b8e0f",
+      "obs_id": "da2b613a-1b58-42f6-b247-51399fae0823",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "INFO_COMMERCIALI",
       "candidateid": "Os2IJycAYHGeHnrN",
@@ -286,10 +316,10 @@
       "embeddingscore": 0.3985,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331707+00:00"
+      "observed_at": "2026-02-25T14:29:34.351746+00:00"
     },
     {
-      "obs_id": "3c2ed88f-7a13-452d-b4e5-c1fb04a2f63d",
+      "obs_id": "fde5d1f1-8231-4817-8baf-4385d786dfee",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "DOCUMENTI",
       "candidateid": "3nagICgXcL2XHUkS",
@@ -299,10 +329,10 @@
       "embeddingscore": 0.4202,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331711+00:00"
+      "observed_at": "2026-02-25T14:29:34.351752+00:00"
     },
     {
-      "obs_id": "03298488-38ec-4b02-bb20-147053e4f5de",
+      "obs_id": "ccf4961f-3227-45ed-9b4d-75de3cbc12f2",
       "message_id": "<abcd1234-5678-90ef-ghij-klmnopqrstuv@example.it>",
       "labelid": "DOCUMENTI",
       "candidateid": "CL-6JNMnyweVxxT-",
@@ -312,32 +342,25 @@
       "embeddingscore": 0.4178,
       "dict_version": 42,
       "promoted_to_active": false,
-      "observed_at": "2026-02-24T23:02:49.331715+00:00"
+      "observed_at": "2026-02-25T14:29:34.351757+00:00"
     }
   ],
   "diagnostics": {
     "warnings": [
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'L4CD0keGl10i4l43'",
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 't9lOmUSIi6dXny_-'",
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'msyzHoS_Evg6f97C'",
       "labelid alias resolved: 'INFOCOMMERCIALI' → 'INFO_COMMERCIALI'",
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'R-DXoOrrXpiqaMc6'",
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'Os2IJycAYHGeHnrN'",
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate '3nagICgXcL2XHUkS'",
-      "keywordsintext: stripped unexpected fields ['count', 'lemma'] from candidate 'CL-6JNMnyweVxxT-'",
-      "Span mismatch: span=[42,64] extracts 'sono corretti: Codice ...' but quote is 'Volevo confermare che i dati s...'",
-      "Span mismatch: span=[86,126] extracts '01U come discusso. Ho verifica...' but quote is 'come discusso. Ho verificato t...'",
-      "Span mismatch: span=[153,193] extracts 'con i termini proposti: durata...' but quote is 'Potete inviarmi il contratto d...'",
-      "Span mismatch: span=[223,246] extracts 'finitivo in formato PDF...' but quote is 'Potete fornirmi un preventivo ...'",
-      "Span mismatch: span=[252,283] extracts 'bile per apporre la firma digi...' but quote is 'In allegato trovate il documen...'"
+      "LLM span corrected server-side: 5 span(s) recomputed from quote"
     ],
+    "errors": [],
     "validation_retries": 0,
     "fallback_applied": false
   },
   "processing_metadata": {
-    "postprocessing_duration_ms": 9,
+    "postprocessing_duration_ms": 11,
     "entities_extracted": 1,
     "observations_created": 7,
-    "confidence_adjustments_applied": 3
+    "confidence_adjustments_applied": 3,
+    "span_exact_match_count": 5,
+    "span_fuzzy_match_count": 0,
+    "span_not_found_count": 0
   }
 }

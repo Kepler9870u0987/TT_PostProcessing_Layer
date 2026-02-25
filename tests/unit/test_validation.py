@@ -383,3 +383,36 @@ class TestEnrichEvidenceWithSpans:
             for ev in t["evidence"]:
                 assert "span_status" in ev
                 assert "span_llm" in ev
+
+    def test_text_hash_present_and_correct(self):
+        import hashlib
+        body = "Testo per il test dell'hash SHA-256."
+        topics = [{"evidence": [{"quote": "test dell'hash"}]}]
+        result = enrich_evidence_with_spans(topics, body)
+        ev = result[0]["evidence"][0]
+        expected = hashlib.sha256(body.encode()).hexdigest()
+        assert "text_hash" in ev
+        assert ev["text_hash"] == expected
+        assert len(ev["text_hash"]) == 64  # SHA-256 hex digest is 64 chars
+
+    def test_text_hash_consistent_across_evidence_items(self):
+        body = "Contratto firmato. Fattura pagata."
+        topics = [{
+            "evidence": [
+                {"quote": "Contratto firmato"},
+                {"quote": "Fattura pagata"},
+            ]
+        }]
+        result = enrich_evidence_with_spans(topics, body)
+        hashes = [ev["text_hash"] for ev in result[0]["evidence"]]
+        # All evidence for the same body_canonical must share the same hash
+        assert len(set(hashes)) == 1
+
+    def test_not_found_also_has_text_hash(self):
+        body = "Testo completamente diverso."
+        topics = [{"evidence": [{"quote": "frase inesistente al mondo"}]}]
+        result = enrich_evidence_with_spans(topics, body)
+        ev = result[0]["evidence"][0]
+        assert ev["span_status"] == "not_found"
+        assert "text_hash" in ev
+        assert ev["text_hash"] is not None

@@ -184,15 +184,36 @@ POST_PROCESSING_OUTPUT_SCHEMA: dict = {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "required": ["quote"],
+                                    "required": ["quote", "span_status", "text_hash"],
                                     "properties": {
                                         "quote": {"type": "string", "maxLength": 200},
                                         "span": {
-                                            "type": "array",
-                                            "minItems": 2,
-                                            "maxItems": 2,
-                                            "items": {"type": "integer"},
+                                            "anyOf": [
+                                                {
+                                                    "type": "array",
+                                                    "minItems": 2,
+                                                    "maxItems": 2,
+                                                    "items": {"type": "integer"},
+                                                },
+                                                {"type": "null"},
+                                            ]
                                         },
+                                        "span_llm": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "array",
+                                                    "minItems": 2,
+                                                    "maxItems": 2,
+                                                    "items": {"type": "integer"},
+                                                },
+                                                {"type": "null"},
+                                            ]
+                                        },
+                                        "span_status": {
+                                            "type": "string",
+                                            "enum": ["exact_match", "fuzzy_match", "not_found"],
+                                        },
+                                        "text_hash": {"type": "string"},
                                     },
                                 },
                             },
@@ -263,9 +284,10 @@ POST_PROCESSING_OUTPUT_SCHEMA: dict = {
         },
         "diagnostics": {
             "type": "object",
-            "required": ["warnings", "validation_retries", "fallback_applied"],
+            "required": ["warnings", "errors", "validation_retries", "fallback_applied"],
             "properties": {
                 "warnings": {"type": "array", "items": {"type": "string"}},
+                "errors": {"type": "array", "items": {"type": "string"}},
                 "validation_retries": {"type": "integer"},
                 "fallback_applied": {"type": "boolean"},
             },

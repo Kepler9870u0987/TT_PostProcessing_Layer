@@ -11,6 +11,7 @@ Implements:
 
 References: post-processing-enrichment-layer.md §3.1, §4
 """
+import hashlib
 import json
 import logging
 from typing import List
@@ -282,6 +283,7 @@ def enrich_evidence_with_spans(
     * ``span``        — server-computed ``[start, end]`` (``None`` if not found)
     * ``span_llm``    — original span produced by the LLM (kept for audit)
     * ``span_status`` — one of ``"exact_match"``, ``"fuzzy_match"``, ``"not_found"``
+    * ``text_hash``   — SHA-256 of *body_canonical* for verifiability
 
     The LLM-supplied span (if present) is moved to ``span_llm`` and
     replaced with the server-computed value.
@@ -289,6 +291,8 @@ def enrich_evidence_with_spans(
     Returns:
         The (mutated) topics list with enriched evidence dicts.
     """
+    text_hash = hashlib.sha256(body_canonical.encode()).hexdigest()
+
     for topic in topics:
         for ev in topic.get("evidence", []):
             quote = ev.get("quote", "")
@@ -297,6 +301,7 @@ def enrich_evidence_with_spans(
             ev["span_llm"] = ev.get("span")  # preserve original LLM span for audit
             ev["span"] = computed_span
             ev["span_status"] = status
+            ev["text_hash"] = text_hash
 
             if status == "not_found":
                 logger.warning(
