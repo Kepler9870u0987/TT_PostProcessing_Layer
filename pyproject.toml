@@ -23,6 +23,8 @@ dependencies = [
     "sentence-transformers>=2.3.0",
     "scikit-learn>=1.4.0",
     "psycopg2-binary>=2.9.9",
+    "redis>=5.0.0",
+    "prometheus-client>=0.20.0",
 ]
 
 [project.optional-dependencies]

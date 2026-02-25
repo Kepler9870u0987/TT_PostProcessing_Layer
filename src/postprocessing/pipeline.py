@@ -17,6 +17,7 @@ import time
 from typing import Callable, Dict, List, Optional, Tuple
 
 from src.dictionary.observations import build_observations
+from src.postprocessing.metrics import LAYER_LATENCY, record_span_status
 from src.entity_extraction.pipeline import extract_all_entities
 from src.models.email_document import EmailDocument
 from src.models.entity import Entity
@@ -130,13 +131,14 @@ def postprocess_and_enrich(
         document.body_canonical,
     )
 
-    # Compute per-status span counts from enriched evidence.
+    # Compute per-status span counts from enriched evidence and record metrics.
     span_counts: dict = {"exact_match": 0, "fuzzy_match": 0, "not_found": 0}
     for _topic in triage_normalized["topics"]:
         for _ev in _topic.get("evidence", []):
             _status = _ev.get("span_status", "not_found")
             if _status in span_counts:
                 span_counts[_status] += 1
+            record_span_status(_status)
 
     # Replace stale LLM-span-mismatch warnings (produced *before* enrichment
     # rewrote all spans) with a single informational summary message, so that
@@ -221,6 +223,7 @@ def postprocess_and_enrich(
     # Assembly
     # ==================================================================
     elapsed_ms = int((time.monotonic() - start_time) * 1000)
+    LAYER_LATENCY.labels(layer_name="postprocessing").observe(elapsed_ms / 1000.0)
 
     return {
         "message_id": document.message_id,

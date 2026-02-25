@@ -98,6 +98,15 @@ LLM_RESPONSE_SCHEMA: dict = {
                                         "type": "string",
                                         "description": "MUST match a candidateid from input candidate list. Do NOT invent.",
                                     },
+                                    # Optional echo fields: LLM naturally mirrors candidate
+                                    # metadata from the prompt. Accepted here so schema
+                                    # validation passes without stripping. Authoritative
+                                    # values are re-populated from catalog by Stage 2.
+                                    "lemma": {"type": "string"},
+                                    "term": {"type": "string"},
+                                    "count": {"type": "integer", "minimum": 1},
+                                    "source": {"type": "string"},
+                                    "embeddingscore": {"type": "number", "minimum": 0, "maximum": 1},
                                 },
                             },
                             "description": "Keywords ONLY from candidate list that support this topic",
