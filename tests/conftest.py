@@ -6,7 +6,6 @@ import json
 import pytest
 
 from src.models.email_document import EmailDocument
-from src.models.entity import Entity
 from src.models.pipeline_version import PipelineVersion
 
 

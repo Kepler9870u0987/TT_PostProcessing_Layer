@@ -114,34 +114,8 @@ pipeline_version = PipelineVersion(
 )
 
 # ---------------------------------------------------------------------------
-# Regex lexicon (EU-standard: email + codice fiscale italiano + IBAN)
+# NOTE: regex_lexicon moved to Entity Extraction Layer (Layer 4)
 # ---------------------------------------------------------------------------
-regex_lexicon = {
-    "EMAIL": [
-        {
-            "regex_pattern": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
-            "label": "EMAIL",
-        }
-    ],
-    "CODICEFISCALE": [
-        {
-            "regex_pattern": r"\b[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]\b",
-            "label": "CODICEFISCALE",
-        }
-    ],
-    "IBAN": [
-        {
-            "regex_pattern": r"\bIT\d{2}[A-Z0-9]{23}\b",
-            "label": "IBAN",
-        }
-    ],
-    "TELEFONO": [
-        {
-            "regex_pattern": r"\b(?:\+39[\s\-]?)?(?:0\d{1,4}[\s\-]?\d{5,8}|3\d{2}[\s\-]?\d{6,7})\b",
-            "label": "TELEFONO",
-        }
-    ],
-}
 
 # ---------------------------------------------------------------------------
 # Esecuzione pipeline
@@ -155,8 +129,6 @@ result = postprocess_and_enrich(
     candidates=candidates,
     document=document,
     pipeline_version=pipeline_version,
-    regex_lexicon=regex_lexicon,
-    nlp_model=None,                        # spaCy opzionale — skip per performance
 )
 
 logger.info("Pipeline completata in %d ms", result["processing_metadata"]["postprocessing_duration_ms"])

@@ -92,7 +92,6 @@ class TestPipelineE2E:
             candidates=candidates,
             document=doc,
             pipeline_version=version,
-            nlp_model=None,  # Skip spaCy for integration test
         )
 
         # Structure checks
@@ -109,7 +108,7 @@ class TestPipelineE2E:
     def test_triage_has_required_fields(self, full_pipeline_inputs):
         doc, candidates, llm_output, version = full_pipeline_inputs
 
-        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result = postprocess_and_enrich(llm_output, candidates, doc, version)
         triage = result["triage"]
 
         assert "topics" in triage
@@ -124,23 +123,19 @@ class TestPipelineE2E:
             assert "confidence_adjusted" in topic
             assert "keywords" in topic  # ★FIX #4★
 
-    def test_entities_extracted(self, full_pipeline_inputs):
+    def test_entities_placeholder_empty(self, full_pipeline_inputs):
         doc, candidates, llm_output, version = full_pipeline_inputs
 
-        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result = postprocess_and_enrich(llm_output, candidates, doc, version)
 
-        # Should find at least email and codice fiscale via regex
+        # Entity extraction moved to Layer 4 — Layer 3 returns empty list
         entities = result["entities"]
-        assert len(entities) >= 1
-
-        labels = [e["label"] for e in entities]
-        # At least one of these should be found
-        assert any(l in labels for l in ["EMAIL", "CODICEFISCALE"])
+        assert entities == []
 
     def test_observations_created(self, full_pipeline_inputs):
         doc, candidates, llm_output, version = full_pipeline_inputs
 
-        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result = postprocess_and_enrich(llm_output, candidates, doc, version)
 
         observations = result["observations"]
         assert len(observations) >= 1
@@ -154,7 +149,7 @@ class TestPipelineE2E:
     def test_diagnostics_populated(self, full_pipeline_inputs):
         doc, candidates, llm_output, version = full_pipeline_inputs
 
-        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result = postprocess_and_enrich(llm_output, candidates, doc, version)
 
         diag = result["diagnostics"]
         assert "warnings" in diag
@@ -167,7 +162,7 @@ class TestPipelineE2E:
     def test_processing_metadata(self, full_pipeline_inputs):
         doc, candidates, llm_output, version = full_pipeline_inputs
 
-        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result = postprocess_and_enrich(llm_output, candidates, doc, version)
 
         meta = result["processing_metadata"]
         assert "postprocessing_duration_ms" in meta
@@ -183,7 +178,7 @@ class TestPipelineE2E:
         """LLM span mismatches must not appear in diagnostics after server-side correction."""
         doc, candidates, llm_output, version = full_pipeline_inputs
 
-        result = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result = postprocess_and_enrich(llm_output, candidates, doc, version)
 
         # None of the final warnings should be a stale "Span mismatch: span=[...]" entry
         for w in result["diagnostics"]["warnings"]:
@@ -240,8 +235,8 @@ class TestDeterminism:
         version = PipelineVersion(dictionaryversion=1, modelversion="test")
 
         # Run the pipeline twice
-        result1 = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
-        result2 = postprocess_and_enrich(llm_output, candidates, doc, version, nlp_model=None)
+        result1 = postprocess_and_enrich(llm_output, candidates, doc, version)
+        result2 = postprocess_and_enrich(llm_output, candidates, doc, version)
 
         # Remove non-deterministic fields
         for r in [result1, result2]:
@@ -271,5 +266,4 @@ class TestPipelineValidationFailure:
                 candidates=[],
                 document=doc,
                 pipeline_version=PipelineVersion(dictionaryversion=1, modelversion="test"),
-                nlp_model=None,
             )

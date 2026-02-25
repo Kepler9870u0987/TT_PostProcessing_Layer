@@ -1,26 +1,25 @@
 """
 Pipeline Orchestrator — main entry point for post-processing & enrichment.
 
-Executes the 7-stage pipeline:
+Executes the 6-stage pipeline:
     1. Validation & Normalization
     2. Keyword Resolution from Catalog ★FIX #1★
     3. Customer Status (deterministic CRM lookup)
     4. Priority Scoring (rule-based)
     5. Confidence Adjustment ★FIX #2★
-    6. Entity Extraction (document-level) ★FIX #3★
-    7. Output Normalization ★FIX #4★ + Observation Storage
+    6. Output Normalization ★FIX #4★ + Observation Storage
+
+Note: Entity Extraction (★FIX #3★) has been moved to a dedicated Layer 4.
 
 Reference: post-processing-enrichment-layer.md §2.2
 """
 import logging
 import time
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from src.dictionary.observations import build_observations
 from src.postprocessing.metrics import LAYER_LATENCY, record_span_status
-from src.entity_extraction.pipeline import extract_all_entities
 from src.models.email_document import EmailDocument
-from src.models.entity import Entity
 from src.models.pipeline_version import PipelineVersion
 from src.postprocessing.confidence import (
     adjust_all_topic_confidences,
@@ -46,23 +45,21 @@ def postprocess_and_enrich(
     pipeline_version: PipelineVersion,
     crm_lookup: Optional[Callable[[str], Tuple[str, float]]] = None,
     scorer: Optional[PriorityScorer] = None,
-    regex_lexicon: Optional[Dict[str, List[dict]]] = None,
-    ner_lexicon: Optional[Dict[str, List[dict]]] = None,
-    nlp_model=None,
     collision_index: Optional[dict] = None,
     evidence_threshold: float = 0.3,
 ) -> dict:
     """
     Main post-processing & enrichment pipeline.
 
-    7-stage flow:
+    6-stage flow:
         1. Validate & Normalize LLM output
         2. Resolve keywords from catalog (★FIX #1★)
         3. Compute customer status (CRM + text signals)
         4. Score priority (rule-based)
         5. Adjust topic confidences (★FIX #2★)
-        6. Extract entities (document-level, ★FIX #3★)
-        7. Build output + observations (★FIX #4★)
+        6. Build output + observations (★FIX #4★)
+
+    Note: Entity Extraction (★FIX #3★) moved to dedicated Layer 4.
 
     Args:
         llm_output_raw: Raw LLM output (JSON string or dict).
@@ -71,9 +68,6 @@ def postprocess_and_enrich(
         pipeline_version: PipelineVersion for traceability.
         crm_lookup: CRM lookup function. Defaults to mock.
         scorer: PriorityScorer instance. Defaults to module-level scorer.
-        regex_lexicon: Regex patterns for entity extraction.
-        ner_lexicon: Gazetteer for lexicon enhancement.
-        nlp_model: Pre-loaded spaCy model for NER.
         collision_index: Pre-computed collision index. If None, builds placeholder.
         evidence_threshold: Max acceptable evidence failure rate (default 0.3).
 
@@ -194,17 +188,7 @@ def postprocess_and_enrich(
     )
 
     # ==================================================================
-    # Stage 6: Entity Extraction (document-level) ★FIX #3★
-    # ==================================================================
-    entities: List[Entity] = extract_all_entities(
-        document.body_canonical,
-        regex_lexicon=regex_lexicon,
-        ner_lexicon=ner_lexicon,
-        nlp_model=nlp_model,
-    )
-
-    # ==================================================================
-    # Stage 7: Observations + Output Normalization ★FIX #4★
+    # Stage 6: Observations + Output Normalization ★FIX #4★
     # ==================================================================
     observations = build_observations(
         document.message_id,
@@ -229,7 +213,7 @@ def postprocess_and_enrich(
         "message_id": document.message_id,
         "pipeline_version": pipeline_version.to_dict(),
         "triage": triage_output,
-        "entities": [e.to_dict() for e in entities],
+        "entities": [],  # Entity extraction moved to Layer 4
         "observations": observations,
         "diagnostics": {
             "warnings": validation_result.warnings,
@@ -239,7 +223,7 @@ def postprocess_and_enrich(
         },
         "processing_metadata": {
             "postprocessing_duration_ms": elapsed_ms,
-            "entities_extracted": len(entities),
+            "entities_extracted": 0,
             "observations_created": len(observations),
             "confidence_adjustments_applied": len(triage_with_conf.get("topics", [])),
             "span_exact_match_count": span_counts["exact_match"],
