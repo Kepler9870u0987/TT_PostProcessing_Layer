@@ -416,3 +416,101 @@ class TestEnrichEvidenceWithSpans:
         assert ev["span_status"] == "not_found"
         assert "text_hash" in ev
         assert ev["text_hash"] is not None
+
+
+# ===========================================================================
+# Pydantic typed models — src.models.triage_io
+# ===========================================================================
+
+from src.models.triage_io import EnrichedEvidence, EvidenceItem, KeywordInText  # noqa: E402
+
+
+class TestKeywordInTextModel:
+    """KeywordInText accepts candidateid-only and all LLM echo fields."""
+
+    def test_minimal_valid(self):
+        kw = KeywordInText(candidateid="ABC123")
+        assert kw.candidateid == "ABC123"
+        assert kw.lemma is None
+        assert kw.count is None
+
+    def test_all_echo_fields_accepted(self):
+        kw = KeywordInText(
+            candidateid="ABC123",
+            lemma="contratto",
+            term="contratto",
+            count=3,
+            source="body",
+            embeddingscore=0.85,
+        )
+        assert kw.lemma == "contratto"
+        assert kw.count == 3
+        assert kw.embeddingscore == 0.85
+
+    def test_count_must_be_positive(self):
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            KeywordInText(candidateid="ABC123", count=0)
+
+    def test_embeddingscore_out_of_range_rejected(self):
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            KeywordInText(candidateid="ABC123", embeddingscore=1.5)
+
+
+class TestEvidenceItemModel:
+    """EvidenceItem validates span format."""
+
+    def test_valid_without_span(self):
+        ev = EvidenceItem(quote="test quote")
+        assert ev.span is None
+
+    def test_valid_with_span(self):
+        ev = EvidenceItem(quote="test quote", span=[10, 25])
+        assert ev.span == [10, 25]
+
+    def test_span_wrong_length_rejected(self):
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            EvidenceItem(quote="test", span=[10])
+
+    def test_span_start_gte_end_rejected(self):
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            EvidenceItem(quote="test", span=[50, 30])
+
+
+class TestEnrichedEvidenceModel:
+    """EnrichedEvidence enforces span_status values."""
+
+    def test_valid_exact_match(self):
+        ev = EnrichedEvidence(
+            quote="some quote from email",
+            span=(13, 34),
+            span_llm=(42, 64),
+            span_status="exact_match",
+            text_hash="b65ab80abc1234",
+        )
+        assert ev.span_status == "exact_match"
+        assert ev.span_llm == (42, 64)
+
+    def test_not_found_with_null_span(self):
+        ev = EnrichedEvidence(
+            quote="missing quote",
+            span=None,
+            span_llm=None,
+            span_status="not_found",
+            text_hash="abc",
+        )
+        assert ev.span is None
+
+    def test_invalid_status_rejected(self):
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            EnrichedEvidence(
+                quote="q",
+                span=None,
+                span_llm=None,
+                span_status="unknown_status",
+                text_hash="abc",
+            )
