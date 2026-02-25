@@ -429,7 +429,7 @@ class TestKeywordInTextModel:
     """KeywordInText accepts candidateid-only and all LLM echo fields."""
 
     def test_minimal_valid(self):
-        kw = KeywordInText(candidateid="ABC123")
+        kw = KeywordInText(candidateid="ABC123")  # type: ignore[call-arg]
         assert kw.candidateid == "ABC123"
         assert kw.lemma is None
         assert kw.count is None
@@ -450,19 +450,19 @@ class TestKeywordInTextModel:
     def test_count_must_be_positive(self):
         from pydantic import ValidationError
         with pytest.raises(ValidationError):
-            KeywordInText(candidateid="ABC123", count=0)
+            KeywordInText(candidateid="ABC123", count=0)  # type: ignore[call-arg]
 
     def test_embeddingscore_out_of_range_rejected(self):
         from pydantic import ValidationError
         with pytest.raises(ValidationError):
-            KeywordInText(candidateid="ABC123", embeddingscore=1.5)
+            KeywordInText(candidateid="ABC123", embeddingscore=1.5)  # type: ignore[call-arg]
 
 
 class TestEvidenceItemModel:
     """EvidenceItem validates span format."""
 
     def test_valid_without_span(self):
-        ev = EvidenceItem(quote="test quote")
+        ev = EvidenceItem(quote="test quote")  # type: ignore[call-arg]
         assert ev.span is None
 
     def test_valid_with_span(self):
